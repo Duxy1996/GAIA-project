@@ -26,8 +26,13 @@ function main()
   //window.setTimeout(function(){ef.setCameraToBack(camera.getCamera());},5000);
 
   initGround();
-
+  window.setInterval(function(){run();},5);
 };
+
+function run()
+{
+  ef.updateStatus();
+}
 
 function initGround()
 {
@@ -81,6 +86,7 @@ class Plane
   {
     //this.radar               = radar;
     //this.cockpit             = cockpit;
+    this.thrust              = 0;
     this.object              = document.createElement('a-entity');
     this.objectRepresetation = document.createElement('a-entity');
   }
@@ -131,6 +137,20 @@ class Plane
     return this.objectRepresetation;
   }
 
+  updateStatus()
+  {
+    var position = this.objectRepresetation.getAttribute('position');
+    var x = position.x;
+    var y = position.y;
+    var z = position.z;
+    this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z-+ this.thrust} );
+  }
+
+  setThrust(thrust)
+  {
+    this.thrust = thrust;
+  }
+
 }
 
 class Radar
@@ -152,6 +172,10 @@ window.addEventListener("keydown", function (event)
   }
   if(event.key == "v"){
     ef.setCameraToBack(camera.getCamera());
+  }
+  if(event.key == "F4"){
+    console.log("Full thrust");
+    ef.setThrust(0.1);
   }
   console.log(event.key);
 });
