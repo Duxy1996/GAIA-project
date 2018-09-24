@@ -16,7 +16,7 @@ function main()
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
   ef.addPlaneScale( 0.1 , 0.1 , 0.1 );
   ef.addColor(myscene);
-  ef.addPosition( 0 , 5 , -5 );
+  ef.setPosition( 0 , 5 , -5 );
   ef.addToScene(myscene);
 
   camera = new Camera();
@@ -79,6 +79,48 @@ class Camera
 
 }
 
+class Engine
+{
+  constructor(pitch,direction,roll)
+  {
+    this.direction           = direction;
+
+    this.roll                = roll;
+    this.pitch               = pitch;
+    this.yaw                 = 0;
+
+    this.thrust              = 0;
+    this.thrustInX           = 0;
+    this.thrustInY           = 0;
+    this.thrustInZ           = 0;
+  }
+
+
+  setThrust(thrust)
+  {
+    this.thrust = thrust;
+  }
+
+  updateDirection(direction)
+  {
+    this.direction = direction;
+  }
+
+  updatePitch(pitch)
+  {
+    this.pitch = pitch;
+  }
+
+  updateThrust()
+  {
+    this.thrustInX = -Math.sin(THREE.Math.degToRad(this.direction)) * this.thrust;
+    this.thrustInY =  Math.sin(THREE.Math.degToRad(this.pitch)) * this.thrust;
+    this.thrustInZ = -Math.cos(THREE.Math.degToRad(this.direction)) * this.thrust;
+
+    //console.log(this.thrustInX,this.thrustInY,this.thrustInZ);
+  }
+
+}
 
 class Plane
 {
@@ -86,9 +128,20 @@ class Plane
   {
     //this.radar               = radar;
     //this.cockpit             = cockpit;
+
+    this.roll                = 0;
+    this.pitch               = 0;
+    this.yaw                 = 0;
+
+    this.direction           = 0;
+
     this.thrust              = 0;
     this.object              = document.createElement('a-entity');
     this.objectRepresetation = document.createElement('a-entity');
+
+    this.engine              = new Engine(this.pitch,this.direction,this.roll);
+    this.engine.updateThrust();
+
   }
 
   addPlaneObject( Objectpath, ObjectId )
@@ -109,10 +162,16 @@ class Plane
     this.objectRepresetation.setAttribute('material','color: #000000;');
   }
 
-  addPosition( x , y , z )
+  setPosition( x , y , z )
   {
     this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z} );
   }
+
+  setRotation()
+  {
+    this.objectRepresetation.setAttribute('rotation', {x: this.pitch, y: 0, z: this.roll} );
+  }
+
 
   addToScene(myscene)
   {
@@ -139,16 +198,24 @@ class Plane
 
   updateStatus()
   {
+    this.setRotation();
+    this.engine.updateDirection(this.direction);
+    this.engine.updatePitch(this.pitch);
     var position = this.objectRepresetation.getAttribute('position');
-    var x = position.x;
-    var y = position.y;
-    var z = position.z;
-    this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z-+ this.thrust} );
+    this.engine.updateThrust();
+    var x = position.x + this.engine.thrustInX;
+    var y = position.y + this.engine.thrustInY;
+    var z = position.z + this.engine.thrustInZ;
+    this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z} );
+    //console.log(this.pitch,this.roll);
+    //console.log( Math.sin(THREE.Math.degToRad(this.pitch)) * Math.sin(THREE.Math.degToRad(this.roll)));
+    this.direction = Math.sin(THREE.Math.degToRad(this.pitch)) * Math.sin(THREE.Math.degToRad(this.roll));
   }
 
   setThrust(thrust)
   {
     this.thrust = thrust;
+    this.engine.setThrust(thrust);
   }
 
 }
@@ -174,8 +241,28 @@ window.addEventListener("keydown", function (event)
     ef.setCameraToBack(camera.getCamera());
   }
   if(event.key == "F4"){
-    console.log("Full thrust");
-    ef.setThrust(0.1);
+    ef.setThrust(0.01);
+  }
+  if(event.key == "F2"){
+    ef.setThrust(0.0);
+  }
+  if(event.key == "6"){
+    ef.roll = ef.roll - 1;
+  }
+  if(event.key == "4"){
+    ef.roll = ef.roll + 1;
+  }
+  if(event.key == "8"){
+    ef.pitch = ef.pitch - 1;
+  }
+  if(event.key == "2"){
+    ef.pitch = ef.pitch + 1;
+  }
+  if(event.key == "9"){
+    ef.direction = ef.direction - 1;
+  }
+  if(event.key == "7"){
+    ef.direction = ef.direction + 1;
   }
   console.log(event.key);
 });
