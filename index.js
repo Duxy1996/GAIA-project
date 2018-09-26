@@ -117,7 +117,7 @@ class Engine
     this.thrustInY =  Math.sin(THREE.Math.degToRad(this.pitch)) * this.thrust * Math.cos(THREE.Math.degToRad(this.roll));
     this.thrustInZ = -Math.cos(THREE.Math.degToRad(this.direction)) * this.thrust * Math.cos(THREE.Math.degToRad(this.pitch));
 
-    //console.log(this.thrustInX,this.thrustInY,this.thrustInZ);
+    //console.log(this.thrustInZ,this.direction,this.pitch,this.thrust);
   }
 
 }
@@ -131,13 +131,19 @@ class Plane
 
     this.roll                = 0;
     this.pitch               = 0;
+    this.antpitch            = 0;
     this.yaw                 = 0;
+
+    this.counter             = 0;
 
     this.direction           = 0;
 
     this.thrust              = 0;
     this.object              = document.createElement('a-entity');
     this.objectRepresetation = document.createElement('a-entity');
+
+    this.axisA               = document.createElement('a-entity');
+    this.axisB               = document.createElement('a-entity');
 
     this.engine              = new Engine(this.pitch,this.direction,this.roll);
     this.engine.updateThrust();
@@ -169,24 +175,52 @@ class Plane
 
   setRotation()
   {
-    var rollX = this.roll * Math.sin(THREE.Math.degToRad(this.direction)) * Math.cos(THREE.Math.degToRad(this.pitch)) * Math.cos(THREE.Math.degToRad(this.roll));
-    var rollY = this.roll * Math.sin(THREE.Math.degToRad(this.pitch));
-    var rollZ = this.roll * Math.cos(THREE.Math.degToRad(this.pitch)) * Math.cos(THREE.Math.degToRad(this.direction));
+    //this.objectRepresetation.setAttribute('rotation', {x: 0, y: this.direction, z: 0} );
+    var m = new THREE.Matrix4();
+    var vector = new THREE.Vector3(0,1,0);
+    var positionA = new THREE.Vector3();
+    var positionB = new THREE.Vector3();
+    positionA = this.axisA.object3D.getWorldPosition();
+    positionB = this.axisB.object3D.getWorldPosition();
+    //console.log(positionA);
+    //console.log(positionB);
+    var posX = positionA.x - positionB.x;
+    var posY = positionA.y - positionB.y;
+    var posZ = positionA.z - positionB.z;
+    var norm = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
+    var myAxis = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
+    var myAxisneg = new THREE.Vector3(-posX/norm,-posY/norm,-posZ/norm);
+    //console.log(myAxis);
+    //if(this.counter < 100000000)
+    //{
+      this.objectRepresetation.object3D.rotateOnAxis(vector,THREE.Math.degToRad(1));
+      //this.counter = this.counter + 1;
+    //}
+    var diff = this.pitch - this.antpitch;
+    this.antpitch = this.pitch;
+    if (Math.abs(diff) < 0.1)
+    {
+      diff = 0;
+    }
+    if (diff > 0){
+      console.log(diff);
+      this.objectRepresetation.object3D.rotateOnWorldAxis(myAxis,THREE.Math.degToRad(diff));
+    }
+    else
+    {
+      console.log(diff);
+      this.objectRepresetation.object3D.rotateOnWorldAxis(myAxisneg,THREE.Math.degToRad(-diff));
+    }
 
-    var pitchX = this.pitch * Math.cos(THREE.Math.degToRad(this.roll)) * Math.cos(THREE.Math.degToRad(this.direction));
-    var pitchY = this.pitch * Math.sin(THREE.Math.degToRad(this.roll));
-    var pitchZ = this.pitch * Math.sin(THREE.Math.degToRad(this.direction)) * Math.sin(THREE.Math.degToRad(this.direction));
-
-    console.log(this.pitch, this.direction, this.roll);
-    console.log(rollX,pitchX,rollY , pitchY,rollZ , pitchZ);
-    console.log(rollX + pitchX,rollY + pitchY,rollZ + pitchZ);
-
-    this.objectRepresetation.setAttribute('rotation', {x: rollX + pitchX, y: rollY + pitchY, z: rollZ + pitchZ} );
   }
 
 
   addToScene(myscene)
   {
+    this.objectRepresetation.appendChild(this.axisA);
+    this.objectRepresetation.appendChild(this.axisB);
+    this.axisA.setAttribute('position',{x: -2, y: 0, z: 0});
+    this.axisB.setAttribute('position',{x: +2, y: 0, z: 0});
     myscene.appendChild(this.object);
     myscene.appendChild(this.objectRepresetation);
   }
@@ -219,14 +253,6 @@ class Plane
     var y = position.y + this.engine.thrustInY;
     var z = position.z + this.engine.thrustInZ;
     this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z} );
-    //console.log(this.pitch,this.roll);
-    //console.log( Math.sin(THREE.Math.degToRad(this.pitch)) * Math.sin(THREE.Math.degToRad(this.roll)));
-    this.direction = 90 * Math.sin(THREE.Math.degToRad(this.pitch)) * Math.sin(THREE.Math.degToRad(this.roll));
-
-    //this.direction = this.direction +(90 * Math.sin(THREE.Math.degToRad(this.pitch)) * Math.sin(THREE.Math.degToRad(this.roll)));
-
-
-
   }
 
   setThrust(thrust)
@@ -258,7 +284,7 @@ window.addEventListener("keydown", function (event)
     ef.setCameraToBack(camera.getCamera());
   }
   if(event.key == "F4"){
-    ef.setThrust(0.01);
+    ef.setThrust(0.05);
   }
   if(event.key == "F2"){
     ef.setThrust(0.0);
