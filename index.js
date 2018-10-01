@@ -130,6 +130,7 @@ class Plane
     //this.cockpit             = cockpit;
 
     this.roll                = 0;
+    this.antroll             = 0;
     this.pitch               = 0;
     this.antpitch            = 0;
     this.yaw                 = 0;
@@ -139,11 +140,14 @@ class Plane
     this.direction           = 0;
 
     this.thrust              = 0;
+
     this.object              = document.createElement('a-entity');
     this.objectRepresetation = document.createElement('a-entity');
 
     this.axisA               = document.createElement('a-entity');
     this.axisB               = document.createElement('a-entity');
+    this.axisC               = document.createElement('a-entity');
+    this.axisD               = document.createElement('a-entity');
 
     this.engine              = new Engine(this.pitch,this.direction,this.roll);
     this.engine.updateThrust();
@@ -175,42 +179,51 @@ class Plane
 
   setRotation()
   {
-    //this.objectRepresetation.setAttribute('rotation', {x: 0, y: this.direction, z: 0} );
-    var m = new THREE.Matrix4();
-    var vector = new THREE.Vector3(0,1,0);
     var positionA = new THREE.Vector3();
     var positionB = new THREE.Vector3();
+
+    var positionC = new THREE.Vector3();
+    var positionD = new THREE.Vector3();
+
     positionA = this.axisA.object3D.getWorldPosition();
     positionB = this.axisB.object3D.getWorldPosition();
-    //console.log(positionA);
-    //console.log(positionB);
+
+    positionC = this.axisC.object3D.getWorldPosition();
+    positionD = this.axisD.object3D.getWorldPosition();
+
     var posX = positionA.x - positionB.x;
     var posY = positionA.y - positionB.y;
     var posZ = positionA.z - positionB.z;
-    var norm = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
-    var myAxis = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
-    var myAxisneg = new THREE.Vector3(-posX/norm,-posY/norm,-posZ/norm);
-    //console.log(myAxis);
-    //if(this.counter < 100000000)
-    //{
-      this.objectRepresetation.object3D.rotateOnAxis(vector,THREE.Math.degToRad(1));
-      //this.counter = this.counter + 1;
-    //}
+
+    var posXP = positionC.x - positionD.x;
+    var posYP = positionC.y - positionD.y;
+    var posZP = positionC.z - positionD.z;
+
+    var norm  = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
+    var normP = Math.sqrt(posXP*posXP+posYP*posYP+posZP*posZP);
+
+    var myAxis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
+    var myAxisP = new THREE.Vector3(posXP/normP,posYP/normP,posZP/normP);
+
+    var diffP = this.roll - this.antroll;
     var diff = this.pitch - this.antpitch;
+
     this.antpitch = this.pitch;
+    this.antroll  = this.roll;
+
     if (Math.abs(diff) < 0.1)
     {
       diff = 0;
     }
-    if (diff > 0){
-      console.log(diff);
-      this.objectRepresetation.object3D.rotateOnWorldAxis(myAxis,THREE.Math.degToRad(diff));
-    }
-    else
+
+    this.objectRepresetation.object3D.rotateOnWorldAxis(myAxis,THREE.Math.degToRad(-diff));
+
+    if (Math.abs(diffP) < 0.1)
     {
-      console.log(diff);
-      this.objectRepresetation.object3D.rotateOnWorldAxis(myAxisneg,THREE.Math.degToRad(-diff));
+      diffP = 0;
     }
+
+    this.objectRepresetation.object3D.rotateOnWorldAxis(myAxisP,THREE.Math.degToRad(-diffP));
 
   }
 
@@ -219,8 +232,16 @@ class Plane
   {
     this.objectRepresetation.appendChild(this.axisA);
     this.objectRepresetation.appendChild(this.axisB);
+
+    this.objectRepresetation.appendChild(this.axisC);
+    this.objectRepresetation.appendChild(this.axisD);
+
     this.axisA.setAttribute('position',{x: -2, y: 0, z: 0});
     this.axisB.setAttribute('position',{x: +2, y: 0, z: 0});
+
+    this.axisC.setAttribute('position',{x: 0, y: 0, z: -2});
+    this.axisD.setAttribute('position',{x: 0, y: 0, z: +2});
+
     myscene.appendChild(this.object);
     myscene.appendChild(this.objectRepresetation);
   }
@@ -275,7 +296,6 @@ class Cockpit
 
 window.addEventListener("keydown", function (event)
 {
-  //alert(event.key);
   if (event.key == "s")
   {
     ef.setCameraTofront(camera.getCamera());
