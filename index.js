@@ -113,11 +113,10 @@ class Engine
 
   updateThrust()
   {
-    this.thrustInX = -Math.sin(THREE.Math.degToRad(this.direction)) * this.thrust * Math.cos(THREE.Math.degToRad(this.pitch));
-    this.thrustInY =  Math.sin(THREE.Math.degToRad(this.pitch)) * this.thrust * Math.cos(THREE.Math.degToRad(this.roll));
-    this.thrustInZ = -Math.cos(THREE.Math.degToRad(this.direction)) * this.thrust * Math.cos(THREE.Math.degToRad(this.pitch));
-
-    //console.log(this.thrustInZ,this.direction,this.pitch,this.thrust);
+    console.log(this.direction);
+    this.thrustInX = this.thrust * this.direction.x;
+    this.thrustInY = this.thrust * this.direction.y;
+    this.thrustInZ = this.thrust * this.direction.z;
   }
 
 }
@@ -137,7 +136,7 @@ class Plane
 
     this.counter             = 0;
 
-    this.direction           = 0;
+    this.direction           = new THREE.Vector3();
 
     this.thrust              = 0;
 
@@ -216,14 +215,15 @@ class Plane
       diff = 0;
     }
 
-    this.objectRepresetation.object3D.rotateOnWorldAxis(myAxis,THREE.Math.degToRad(-diff));
-
     if (Math.abs(diffP) < 0.1)
     {
       diffP = 0;
     }
 
+    this.objectRepresetation.object3D.rotateOnWorldAxis(myAxis,THREE.Math.degToRad(-diff));
     this.objectRepresetation.object3D.rotateOnWorldAxis(myAxisP,THREE.Math.degToRad(-diffP));
+
+    this.direction.copy(myAxisP);
 
   }
 
