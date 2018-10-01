@@ -1,3 +1,5 @@
+//import TrackInfo from './models/trackInfo.js'
+
 
 var ef;
 var camera;
@@ -10,6 +12,7 @@ window.onload = function()
 
 function main()
 {
+
   myscene = document.querySelector('a-scene');
 
   ef = new Plane();
@@ -113,7 +116,7 @@ class Engine
 
   updateThrust()
   {
-    console.log(this.direction);
+    //console.log(this.direction);
     this.thrustInX = this.thrust * this.direction.x;
     this.thrustInY = this.thrust * this.direction.y;
     this.thrustInZ = this.thrust * this.direction.z;
@@ -327,5 +330,5 @@ window.addEventListener("keydown", function (event)
   if(event.key == "7"){
     ef.direction = ef.direction + 1;
   }
-  console.log(event.key);
+  //console.log(event.key);
 });
