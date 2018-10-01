@@ -16,7 +16,7 @@ function main()
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
   ef.addPlaneScale( 0.1 , 0.1 , 0.1 );
   ef.addColor(myscene);
-  ef.addPosition( 0 , 5 , -5 );
+  ef.setPosition( 0 , 5 , -5 );
   ef.addToScene(myscene);
 
   camera = new Camera();
@@ -26,7 +26,7 @@ function main()
   //window.setTimeout(function(){ef.setCameraToBack(camera.getCamera());},5000);
 
   initGround();
-  window.setInterval(function(){run();},5);
+  window.setInterval(function(){run();},50);
 };
 
 function run()
@@ -79,6 +79,47 @@ class Camera
 
 }
 
+class Engine
+{
+  constructor(pitch,direction,roll)
+  {
+    this.direction           = direction;
+
+    this.roll                = roll;
+    this.pitch               = pitch;
+    this.yaw                 = 0;
+
+    this.thrust              = 0;
+    this.thrustInX           = 0;
+    this.thrustInY           = 0;
+    this.thrustInZ           = 0;
+  }
+
+
+  setThrust(thrust)
+  {
+    this.thrust = thrust;
+  }
+
+  updateDirection(direction)
+  {
+    this.direction = direction;
+  }
+
+  updatePitch(pitch)
+  {
+    this.pitch = pitch;
+  }
+
+  updateThrust()
+  {
+    console.log(this.direction);
+    this.thrustInX = this.thrust * this.direction.x;
+    this.thrustInY = this.thrust * this.direction.y;
+    this.thrustInZ = this.thrust * this.direction.z;
+  }
+
+}
 
 class Plane
 {
@@ -86,9 +127,30 @@ class Plane
   {
     //this.radar               = radar;
     //this.cockpit             = cockpit;
+
+    this.roll                = 0;
+    this.antroll             = 0;
+    this.pitch               = 0;
+    this.antpitch            = 0;
+    this.yaw                 = 0;
+
+    this.counter             = 0;
+
+    this.direction           = new THREE.Vector3();
+
     this.thrust              = 0;
+
     this.object              = document.createElement('a-entity');
     this.objectRepresetation = document.createElement('a-entity');
+
+    this.axisA               = document.createElement('a-entity');
+    this.axisB               = document.createElement('a-entity');
+    this.axisC               = document.createElement('a-entity');
+    this.axisD               = document.createElement('a-entity');
+
+    this.engine              = new Engine(this.pitch,this.direction,this.roll);
+    this.engine.updateThrust();
+
   }
 
   addPlaneObject( Objectpath, ObjectId )
@@ -109,13 +171,77 @@ class Plane
     this.objectRepresetation.setAttribute('material','color: #000000;');
   }
 
-  addPosition( x , y , z )
+  setPosition( x , y , z )
   {
     this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z} );
   }
 
+  setRotation()
+  {
+    var positionA = new THREE.Vector3();
+    var positionB = new THREE.Vector3();
+
+    var positionC = new THREE.Vector3();
+    var positionD = new THREE.Vector3();
+
+    positionA = this.axisA.object3D.getWorldPosition();
+    positionB = this.axisB.object3D.getWorldPosition();
+
+    positionC = this.axisC.object3D.getWorldPosition();
+    positionD = this.axisD.object3D.getWorldPosition();
+
+    var posX = positionA.x - positionB.x;
+    var posY = positionA.y - positionB.y;
+    var posZ = positionA.z - positionB.z;
+
+    var posXP = positionC.x - positionD.x;
+    var posYP = positionC.y - positionD.y;
+    var posZP = positionC.z - positionD.z;
+
+    var norm  = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
+    var normP = Math.sqrt(posXP*posXP+posYP*posYP+posZP*posZP);
+
+    var myAxis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
+    var myAxisP = new THREE.Vector3(posXP/normP,posYP/normP,posZP/normP);
+
+    var diffP = this.roll - this.antroll;
+    var diff = this.pitch - this.antpitch;
+
+    this.antpitch = this.pitch;
+    this.antroll  = this.roll;
+
+    if (Math.abs(diff) < 0.1)
+    {
+      diff = 0;
+    }
+
+    if (Math.abs(diffP) < 0.1)
+    {
+      diffP = 0;
+    }
+
+    this.objectRepresetation.object3D.rotateOnWorldAxis(myAxis,THREE.Math.degToRad(-diff));
+    this.objectRepresetation.object3D.rotateOnWorldAxis(myAxisP,THREE.Math.degToRad(-diffP));
+
+    this.direction.copy(myAxisP);
+
+  }
+
+
   addToScene(myscene)
   {
+    this.objectRepresetation.appendChild(this.axisA);
+    this.objectRepresetation.appendChild(this.axisB);
+
+    this.objectRepresetation.appendChild(this.axisC);
+    this.objectRepresetation.appendChild(this.axisD);
+
+    this.axisA.setAttribute('position',{x: -2, y: 0, z: 0});
+    this.axisB.setAttribute('position',{x: +2, y: 0, z: 0});
+
+    this.axisC.setAttribute('position',{x: 0, y: 0, z: -2});
+    this.axisD.setAttribute('position',{x: 0, y: 0, z: +2});
+
     myscene.appendChild(this.object);
     myscene.appendChild(this.objectRepresetation);
   }
@@ -128,7 +254,7 @@ class Plane
 
   setCameraToBack(camera)
   {
-    camera.setAttribute('position', {x: 0, y: 4, z: 4} );
+    camera.setAttribute('position', {x: 0, y: 4, z: 4});
     camera.setAttribute('camera', 'active', true);
   }
 
@@ -139,16 +265,21 @@ class Plane
 
   updateStatus()
   {
+    this.setRotation();
+    this.engine.updateDirection(this.direction);
+    this.engine.updatePitch(this.pitch);
     var position = this.objectRepresetation.getAttribute('position');
-    var x = position.x;
-    var y = position.y;
-    var z = position.z;
-    this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z-+ this.thrust} );
+    this.engine.updateThrust();
+    var x = position.x + this.engine.thrustInX;
+    var y = position.y + this.engine.thrustInY;
+    var z = position.z + this.engine.thrustInZ;
+    this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z} );
   }
 
   setThrust(thrust)
   {
     this.thrust = thrust;
+    this.engine.setThrust(thrust);
   }
 
 }
@@ -165,7 +296,6 @@ class Cockpit
 
 window.addEventListener("keydown", function (event)
 {
-  //alert(event.key);
   if (event.key == "s")
   {
     ef.setCameraTofront(camera.getCamera());
@@ -174,8 +304,28 @@ window.addEventListener("keydown", function (event)
     ef.setCameraToBack(camera.getCamera());
   }
   if(event.key == "F4"){
-    console.log("Full thrust");
-    ef.setThrust(0.1);
+    ef.setThrust(0.05);
+  }
+  if(event.key == "F2"){
+    ef.setThrust(0.0);
+  }
+  if(event.key == "6"){
+    ef.roll = ef.roll - 1;
+  }
+  if(event.key == "4"){
+    ef.roll = ef.roll + 1;
+  }
+  if(event.key == "8"){
+    ef.pitch = ef.pitch - 1;
+  }
+  if(event.key == "2"){
+    ef.pitch = ef.pitch + 1;
+  }
+  if(event.key == "9"){
+    ef.direction = ef.direction - 1;
+  }
+  if(event.key == "7"){
+    ef.direction = ef.direction + 1;
   }
   console.log(event.key);
 });
