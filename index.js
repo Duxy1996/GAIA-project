@@ -1,7 +1,15 @@
+//import TrackInfo from './models/trackInfo.js'
+
 
 var ef;
+var sp;
+var ae;
+
 var camera;
 var myscene;
+
+var listOfPlanes = [];
+listOfPlanes.push(ef);
 
 window.onload = function()
 {
@@ -10,23 +18,31 @@ window.onload = function()
 
 function main()
 {
+
   myscene = document.querySelector('a-scene');
 
   ef = new Plane();
+  sp = new Plane();
+
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
+  sp.addPlaneObject('./assets/models/spitfire.obj','sp1');
   ef.addPlaneScale( 0.1 , 0.1 , 0.1 );
-  ef.addColor(myscene);
-  ef.setPosition( 0 , 5 , -5 );
+  sp.addPlaneScale( 0.3 , 0.3 , 0.3 );
+  ef.addColor();
+  sp.addColor();
   ef.addToScene(myscene);
+  sp.addToScene(myscene);
+  ef.setPosition( 0 , 5 , -5 );
+  sp.setPosition( 2 , 5 , -10 );
+  ef.setSimpleRotation( 0, 0, 0);
+  sp.setSimpleRotation( 0, 180, 0);
 
   camera = new Camera();
   camera.attach(ef.getPlane());
 
   ef.setCameraTofront(camera.getCamera());
-  //window.setTimeout(function(){ef.setCameraToBack(camera.getCamera());},5000);
-
   initGround();
-  window.setInterval(function(){run();},50);
+  window.setInterval(function(){run();},5);
 };
 
 function run()
@@ -53,7 +69,6 @@ class Camera
     this.camera.setAttribute('camera', 'active', true);
     this.camera.setAttribute('look-controls','enabled',true);
     this.camera.setAttribute('wasd-controls');
-    //this.camera.setAttribute('data-aframe-default-camera');
     this.camera.setAttribute('id', 'camera');
   }
 
@@ -113,7 +128,6 @@ class Engine
 
   updateThrust()
   {
-    console.log(this.direction);
     this.thrustInX = this.thrust * this.direction.x;
     this.thrustInY = this.thrust * this.direction.y;
     this.thrustInZ = this.thrust * this.direction.z;
@@ -125,14 +139,20 @@ class Plane
 {
   constructor()
   {
-    //this.radar               = radar;
-    //this.cockpit             = cockpit;
-
     this.roll                = 0;
     this.antroll             = 0;
     this.pitch               = 0;
     this.antpitch            = 0;
     this.yaw                 = 0;
+
+    this.name                = 0;
+    this.id                  = 0;
+
+    this.radarAA             = new radarAA();
+    this.trackInfo           = new trackInfo();
+
+    this.pitchAxis = THREE.Vector3();
+    this.rollAxis  = THREE.Vector3();
 
     this.counter             = 0;
 
@@ -151,6 +171,8 @@ class Plane
     this.engine              = new Engine(this.pitch,this.direction,this.roll);
     this.engine.updateThrust();
 
+    this.setPosition(0,0,0);
+
   }
 
   addPlaneObject( Objectpath, ObjectId )
@@ -166,6 +188,27 @@ class Plane
     this.objectRepresetation.setAttribute('scale', {x: x, y: y, z: z});
   }
 
+  initTrackInfo()
+  {
+    this.trackInfo.setName(this.name);
+    this.trackInfo.setId(this.id);
+    this.setDisNumber(this.id + this.name);
+  }
+
+  updateTrackInfo()
+  {
+    var position = this.objectRepresetation.getAttribute('position');
+    this.trackInfo.setPosition(position);
+    this.trackInfo.setPitchAxis(this.pitchAxis);
+    this.trackInfo.setRollAxis(this.rollAxis);
+    this.trackInfo.setDirection(this.direction);
+  }
+
+  getTrackInfo()
+  {
+    return this.trackInfo;
+  }
+
   addColor()
   {
     this.objectRepresetation.setAttribute('material','color: #000000;');
@@ -174,6 +217,19 @@ class Plane
   setPosition( x , y , z )
   {
     this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z} );
+  }
+
+  getAxisBetweenTwoPoints(pointA,pointB)
+  {
+    var posX = pointA.x - pointB.x;
+    var posY = pointA.y - pointB.y;
+    var posZ = pointA.z - pointB.z;
+
+    var norm  = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
+
+    var axis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
+
+    return axis;
   }
 
   setRotation()
@@ -190,19 +246,11 @@ class Plane
     positionC = this.axisC.object3D.getWorldPosition();
     positionD = this.axisD.object3D.getWorldPosition();
 
-    var posX = positionA.x - positionB.x;
-    var posY = positionA.y - positionB.y;
-    var posZ = positionA.z - positionB.z;
+    var myAxis  = this.getAxisBetweenTwoPoints(positionA,positionB);
+    var myAxisP = this.getAxisBetweenTwoPoints(positionC,positionD);
 
-    var posXP = positionC.x - positionD.x;
-    var posYP = positionC.y - positionD.y;
-    var posZP = positionC.z - positionD.z;
-
-    var norm  = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
-    var normP = Math.sqrt(posXP*posXP+posYP*posYP+posZP*posZP);
-
-    var myAxis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
-    var myAxisP = new THREE.Vector3(posXP/normP,posYP/normP,posZP/normP);
+    this.pitchAxis = myAxis;
+    this.rollAxis  = myAxisP;
 
     var diffP = this.roll - this.antroll;
     var diff = this.pitch - this.antpitch;
@@ -225,6 +273,11 @@ class Plane
 
     this.direction.copy(myAxisP);
 
+  }
+
+  setSimpleRotation( x, y, z)
+  {
+    this.objectRepresetation.setAttribute('rotation',{x: x, y: y, z:z});
   }
 
 
@@ -269,7 +322,9 @@ class Plane
     this.engine.updateDirection(this.direction);
     this.engine.updatePitch(this.pitch);
     var position = this.objectRepresetation.getAttribute('position');
+    this.radarAA.updatePosition(position);
     this.engine.updateThrust();
+    this.updateTrackInfo();
     var x = position.x + this.engine.thrustInX;
     var y = position.y + this.engine.thrustInY;
     var z = position.z + this.engine.thrustInZ;
@@ -284,16 +339,6 @@ class Plane
 
 }
 
-class Radar
-{
-
-}
-
-class Cockpit
-{
-
-}
-
 window.addEventListener("keydown", function (event)
 {
   if (event.key == "s")
@@ -304,7 +349,7 @@ window.addEventListener("keydown", function (event)
     ef.setCameraToBack(camera.getCamera());
   }
   if(event.key == "F4"){
-    ef.setThrust(0.05);
+    ef.setThrust(0.025);
   }
   if(event.key == "F2"){
     ef.setThrust(0.0);
@@ -327,5 +372,5 @@ window.addEventListener("keydown", function (event)
   if(event.key == "7"){
     ef.direction = ef.direction + 1;
   }
-  console.log(event.key);
+  //console.log(event.key);
 });
