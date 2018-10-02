@@ -1,4 +1,4 @@
-class TrackInfo
+class trackInfo
   {
     constructor()
     {
@@ -39,6 +39,16 @@ class TrackInfo
     getId()
     {
       return id;
+    }
+
+    setPosition(position)
+    {
+      this.position = position;
+    }
+
+    getposition()
+    {
+      return this.position;
     }
 
     setPitchAxis(pitchAxis)

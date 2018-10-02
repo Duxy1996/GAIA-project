@@ -2,6 +2,9 @@
 
 
 var ef;
+var sp;
+var ae;
+
 var camera;
 var myscene;
 
@@ -19,12 +22,20 @@ function main()
   myscene = document.querySelector('a-scene');
 
   ef = new Plane();
+  sp = new Plane();
+
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
+  sp.addPlaneObject('./assets/models/spitfire.obj','sp1');
   ef.addPlaneScale( 0.1 , 0.1 , 0.1 );
+  sp.addPlaneScale( 0.3 , 0.3 , 0.3 );
   ef.addColor();
+  sp.addColor();
   ef.addToScene(myscene);
+  sp.addToScene(myscene);
   ef.setPosition( 0 , 5 , -5 );
-  ef.setSimpleRotation( 0, 0, 0)
+  sp.setPosition( 2 , 5 , -10 );
+  ef.setSimpleRotation( 0, 0, 0);
+  sp.setSimpleRotation( 0, 180, 0);
 
   camera = new Camera();
   camera.attach(ef.getPlane());
@@ -117,7 +128,6 @@ class Engine
 
   updateThrust()
   {
-    //console.log(this.direction);
     this.thrustInX = this.thrust * this.direction.x;
     this.thrustInY = this.thrust * this.direction.y;
     this.thrustInZ = this.thrust * this.direction.z;
@@ -129,16 +139,20 @@ class Plane
 {
   constructor()
   {
-    //this.radar               = radar;
-    //this.cockpit             = cockpit;
-
     this.roll                = 0;
     this.antroll             = 0;
     this.pitch               = 0;
     this.antpitch            = 0;
     this.yaw                 = 0;
 
+    this.name                = 0;
+    this.id                  = 0;
+
     this.radarAA             = new radarAA();
+    this.trackInfo           = new trackInfo();
+
+    this.pitchAxis = THREE.Vector3();
+    this.rollAxis  = THREE.Vector3();
 
     this.counter             = 0;
 
@@ -172,6 +186,27 @@ class Plane
   addPlaneScale( x , y , z )
   {
     this.objectRepresetation.setAttribute('scale', {x: x, y: y, z: z});
+  }
+
+  initTrackInfo()
+  {
+    this.trackInfo.setName(this.name);
+    this.trackInfo.setId(this.id);
+    this.setDisNumber(this.id + this.name);
+  }
+
+  updateTrackInfo()
+  {
+    var position = this.objectRepresetation.getAttribute('position');
+    this.trackInfo.setPosition(position);
+    this.trackInfo.setPitchAxis(this.pitchAxis);
+    this.trackInfo.setRollAxis(this.rollAxis);
+    this.trackInfo.setDirection(this.direction);
+  }
+
+  getTrackInfo()
+  {
+    return this.trackInfo;
   }
 
   addColor()
@@ -213,6 +248,9 @@ class Plane
 
     var myAxis  = this.getAxisBetweenTwoPoints(positionA,positionB);
     var myAxisP = this.getAxisBetweenTwoPoints(positionC,positionD);
+
+    this.pitchAxis = myAxis;
+    this.rollAxis  = myAxisP;
 
     var diffP = this.roll - this.antroll;
     var diff = this.pitch - this.antpitch;
@@ -286,6 +324,7 @@ class Plane
     var position = this.objectRepresetation.getAttribute('position');
     this.radarAA.updatePosition(position);
     this.engine.updateThrust();
+    this.updateTrackInfo();
     var x = position.x + this.engine.thrustInX;
     var y = position.y + this.engine.thrustInY;
     var z = position.z + this.engine.thrustInZ;
@@ -310,7 +349,7 @@ window.addEventListener("keydown", function (event)
     ef.setCameraToBack(camera.getCamera());
   }
   if(event.key == "F4"){
-    ef.setThrust(0.05);
+    ef.setThrust(0.025);
   }
   if(event.key == "F2"){
     ef.setThrust(0.0);
