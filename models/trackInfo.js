@@ -5,12 +5,10 @@ class TrackInfo
       this.name;
       this.id;
       this.disNumber;
-      this.positionX;
-      this.positionY;
-      this.positionZ;
-      this.pitchAxis;
-      this.rollAxis;
-      this.direction;
+      this.position  = THREE.Vector3();
+      this.pitchAxis = THREE.Vector3();
+      this.rollAxis  = THREE.Vector3();
+      this.direction = THREE.Vector3();
     }
 
     setName(name)
@@ -23,23 +21,53 @@ class TrackInfo
       return this.name;
     }
 
-    setDisNumber()
+    setDisNumber(disNumber)
     {
-
+      this.disNumber = disNumber;
     }
 
     getDisNumber()
     {
-
+      return this.disNumber;
     }
 
-    setId()
+    setId(id)
     {
-
+      this.id = id;
     }
 
     getId()
     {
+      return id;
+    }
 
+    setPitchAxis(pitchAxis)
+    {
+      this.pitchAxis = pitchAxis;
+    }
+
+    getPitchAxis()
+    {
+      return this.pitchAxis;
+    }
+
+    setRollAxis(rollAxis)
+    {
+      this.rollAxis = rollAxis;
+    }
+
+    getRollAxis()
+    {
+      return this.rollAxis;
+    }
+
+    setDirection(direction)
+    {
+      this.direction = direction;
+    }
+
+    getDirection()
+    {
+      return this.direction;
     }
   }

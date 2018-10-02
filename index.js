@@ -5,6 +5,9 @@ var ef;
 var camera;
 var myscene;
 
+var listOfPlanes = [];
+listOfPlanes.push(ef);
+
 window.onload = function()
 {
   main();
@@ -18,18 +21,17 @@ function main()
   ef = new Plane();
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
   ef.addPlaneScale( 0.1 , 0.1 , 0.1 );
-  ef.addColor(myscene);
-  ef.setPosition( 0 , 5 , -5 );
+  ef.addColor();
   ef.addToScene(myscene);
+  ef.setPosition( 0 , 5 , -5 );
+  ef.setSimpleRotation( 0, 0, 0)
 
   camera = new Camera();
   camera.attach(ef.getPlane());
 
   ef.setCameraTofront(camera.getCamera());
-  //window.setTimeout(function(){ef.setCameraToBack(camera.getCamera());},5000);
-
   initGround();
-  window.setInterval(function(){run();},50);
+  window.setInterval(function(){run();},5);
 };
 
 function run()
@@ -56,7 +58,6 @@ class Camera
     this.camera.setAttribute('camera', 'active', true);
     this.camera.setAttribute('look-controls','enabled',true);
     this.camera.setAttribute('wasd-controls');
-    //this.camera.setAttribute('data-aframe-default-camera');
     this.camera.setAttribute('id', 'camera');
   }
 
@@ -137,6 +138,8 @@ class Plane
     this.antpitch            = 0;
     this.yaw                 = 0;
 
+    this.radarAA             = new radarAA();
+
     this.counter             = 0;
 
     this.direction           = new THREE.Vector3();
@@ -153,6 +156,8 @@ class Plane
 
     this.engine              = new Engine(this.pitch,this.direction,this.roll);
     this.engine.updateThrust();
+
+    this.setPosition(0,0,0);
 
   }
 
@@ -179,6 +184,19 @@ class Plane
     this.objectRepresetation.setAttribute('position', {x: x, y: y, z: z} );
   }
 
+  getAxisBetweenTwoPoints(pointA,pointB)
+  {
+    var posX = pointA.x - pointB.x;
+    var posY = pointA.y - pointB.y;
+    var posZ = pointA.z - pointB.z;
+
+    var norm  = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
+
+    var axis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
+
+    return axis;
+  }
+
   setRotation()
   {
     var positionA = new THREE.Vector3();
@@ -193,19 +211,8 @@ class Plane
     positionC = this.axisC.object3D.getWorldPosition();
     positionD = this.axisD.object3D.getWorldPosition();
 
-    var posX = positionA.x - positionB.x;
-    var posY = positionA.y - positionB.y;
-    var posZ = positionA.z - positionB.z;
-
-    var posXP = positionC.x - positionD.x;
-    var posYP = positionC.y - positionD.y;
-    var posZP = positionC.z - positionD.z;
-
-    var norm  = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
-    var normP = Math.sqrt(posXP*posXP+posYP*posYP+posZP*posZP);
-
-    var myAxis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
-    var myAxisP = new THREE.Vector3(posXP/normP,posYP/normP,posZP/normP);
+    var myAxis  = this.getAxisBetweenTwoPoints(positionA,positionB);
+    var myAxisP = this.getAxisBetweenTwoPoints(positionC,positionD);
 
     var diffP = this.roll - this.antroll;
     var diff = this.pitch - this.antpitch;
@@ -228,6 +235,11 @@ class Plane
 
     this.direction.copy(myAxisP);
 
+  }
+
+  setSimpleRotation( x, y, z)
+  {
+    this.objectRepresetation.setAttribute('rotation',{x: x, y: y, z:z});
   }
 
 
@@ -272,6 +284,7 @@ class Plane
     this.engine.updateDirection(this.direction);
     this.engine.updatePitch(this.pitch);
     var position = this.objectRepresetation.getAttribute('position');
+    this.radarAA.updatePosition(position);
     this.engine.updateThrust();
     var x = position.x + this.engine.thrustInX;
     var y = position.y + this.engine.thrustInY;
@@ -284,16 +297,6 @@ class Plane
     this.thrust = thrust;
     this.engine.setThrust(thrust);
   }
-
-}
-
-class Radar
-{
-
-}
-
-class Cockpit
-{
 
 }
 
