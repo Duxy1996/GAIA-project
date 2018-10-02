@@ -8,19 +8,19 @@ We are creating this repo to develop a basic scaffold to build your own flight m
 weapon maagement and even the IOS management. Furthermore we want to make a server to do a multi-lan connections
 for the same simulation rom.
 
-[ ] VR Cockpit for EF
-[ ] Basic IOS controller
-[X] Basic Flight model
-[ ] Basic avionics calculos
-[ ] Basic weapon system
-[ ] Multiplatform service
-[ ] GO/GIN based application
-[ ] React based interface managerç
-[ ] Implement CI with travis
-[ ] Artefact lib with CONAN
-[ ] Fast deploy with Docker
-[ ] ThreeJS model management (A-Frame framawork used)
-[ ] ...
+* [ ] VR Cockpit for EF
+* [ ] Basic IOS controller
+* [X] Basic Flight model
+* [ ] Basic avionics calculos
+* [ ] Basic weapon system
+* [ ] Multiplatform service
+* [ ] GO/GIN based application
+* [ ] React based interface managerç
+* [ ] Implement CI with travis
+* [ ] Artefact lib with CONAN
+* [ ] Fast deploy with Docker
+* [ ] ThreeJS model management (A-Frame framawork used)
+* [ ] ...
 
 The progress:
 
