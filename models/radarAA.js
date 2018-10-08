@@ -103,13 +103,12 @@ class radarAA
 
         otPlanePos                 = listOfPlanes[planes].getTrackInfo().getposition();
         name                       = listOfPlanes[planes].getTrackInfo().getName();
-
-        console.log(name);
-
+        //console.log(name,this.rollAxis);
         if (otPlanePos != undefined)
         {
           relativePositionVector     = this.getAxisBetweenTwoPoints(otPlanePos,this.position);
-          console.log(relativePositionVector);
+          //console.log(relativePositionVector);
+          //console.log((1/3.14)*180*(relativePositionVector.angleTo(this.rollAxis)));
         }
       }
     }

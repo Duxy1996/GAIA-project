@@ -32,14 +32,14 @@ function main()
   ef.setPosition( 0 , 5 , -5 );
   sp.setPosition( 2 , 5 , -10 );
   ef.setSimpleRotation( 0, 0, 0);
-  sp.setSimpleRotation( 0, 180, 0);
+  sp.setSimpleRotation( 0, 0, 0);
 
   camera = new Camera();
   camera.attach(ef.getPlane());
 
   ef.setCameraTofront(camera.getCamera());
   initGround();
-  window.setInterval(function(){run();},500);
+  window.setInterval(function(){run();},5);
 };
 
 function run()
