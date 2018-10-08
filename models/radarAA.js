@@ -2,9 +2,11 @@ class radarAA
 {
   constructor()
   {
-    this.position = new THREE.Vector3();
+    this.position     = THREE.Vector3();
+    this.pitchAxis    = THREE.Vector3();
+    this.rollAxis     = THREE.Vector3();
 
-    this.listOfTracks;
+    this.listOfTracks = [];
     this.ownerId;
     this.ownerName;
 
@@ -68,8 +70,50 @@ class radarAA
     }
   }
 
-  updatePosition(position)
+  updatePosition(position, pitchAxis, rollAxis)
   {
     this.position = position;
+    this.pitchAxis = pitchAxis;
+    this.rollAxis = rollAxis;
+  }
+
+  getAxisBetweenTwoPoints(pointA,pointB)
+  {
+    var posX = pointA.x - pointB.x;
+    var posY = pointA.y - pointB.y;
+    var posZ = pointA.z - pointB.z;
+
+    var norm  = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
+
+    var axis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
+
+    return axis;
+  }
+
+  updateTracks(listOfPlanes)
+  {
+
+    for (var planes in listOfPlanes)
+    {
+      if (this.position != listOfPlanes[planes].getTrackInfo().getposition())
+      {
+        var otPlanePos             = THREE.Vector3();
+        var relativePositionVector = THREE.Vector3();
+        var name = "";
+
+        otPlanePos                 = listOfPlanes[planes].getTrackInfo().getposition();
+        name                       = listOfPlanes[planes].getTrackInfo().getName();
+
+        console.log(name);
+
+        if (otPlanePos != undefined)
+        {
+          relativePositionVector     = this.getAxisBetweenTwoPoints(otPlanePos,this.position);
+          console.log(relativePositionVector);
+        }
+      }
+    }
+    //console.log(listOfPlanes[listOfPlanes.length-2].getTrackInfo().getposition());
+    //console.log(this.pitchAxis);
   }
 }

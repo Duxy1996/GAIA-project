@@ -8,9 +8,6 @@ var ae;
 var camera;
 var myscene;
 
-var listOfPlanes = [];
-listOfPlanes.push(ef);
-
 window.onload = function()
 {
   main();
@@ -21,8 +18,8 @@ function main()
 
   myscene = document.querySelector('a-scene');
 
-  ef = new Plane();
-  sp = new Plane();
+  ef = new Plane("ef");
+  sp = new Plane("sp");
 
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
   sp.addPlaneObject('./assets/models/spitfire.obj','sp1');
@@ -42,12 +39,13 @@ function main()
 
   ef.setCameraTofront(camera.getCamera());
   initGround();
-  window.setInterval(function(){run();},5);
+  window.setInterval(function(){run();},500);
 };
 
 function run()
 {
   ef.updateStatus();
+  sp.updateStatus();
 }
 
 function initGround()
@@ -137,7 +135,7 @@ class Engine
 
 class Plane
 {
-  constructor()
+  constructor(pName)
   {
     this.roll                = 0;
     this.antroll             = 0;
@@ -145,7 +143,7 @@ class Plane
     this.antpitch            = 0;
     this.yaw                 = 0;
 
-    this.name                = 0;
+    this.name                = pName;
     this.id                  = 0;
 
     this.radarAA             = new radarAA();
@@ -172,6 +170,7 @@ class Plane
     this.engine.updateThrust();
 
     this.setPosition(0,0,0);
+    this.initTrackInfo();
 
   }
 
@@ -192,7 +191,7 @@ class Plane
   {
     this.trackInfo.setName(this.name);
     this.trackInfo.setId(this.id);
-    this.setDisNumber(this.id + this.name);
+    //this.setDisNumber(this.id + this.name);
   }
 
   updateTrackInfo()
@@ -322,9 +321,18 @@ class Plane
     this.engine.updateDirection(this.direction);
     this.engine.updatePitch(this.pitch);
     var position = this.objectRepresetation.getAttribute('position');
-    this.radarAA.updatePosition(position);
+    this.radarAA.updatePosition(position,this.pitchAxis,this.rollAxis);
+
     this.engine.updateThrust();
+
     this.updateTrackInfo();
+
+    var listOfPlanes = [];
+    listOfPlanes.push(ef);
+    listOfPlanes.push(sp);
+
+    this.radarAA.updateTracks(listOfPlanes);
+
     var x = position.x + this.engine.thrustInX;
     var y = position.y + this.engine.thrustInY;
     var z = position.z + this.engine.thrustInZ;
