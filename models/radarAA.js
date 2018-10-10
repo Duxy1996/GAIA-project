@@ -29,9 +29,24 @@ class radarAA
     this.incrementError;
   }
 
-  createDetectionCone()
+  initializeAzimuth(minAzimuth,maxAzimuth,azimuzJump)
   {
+    this.minAzimuth = minAzimuth;
+    this.maxAzimuth = maxAzimuth;
+    this.azimuzJump = azimuzJump;
+  }
 
+  initializeAzimuth(minPitch,maxPitch,pitchJump)
+  {
+    this.minPitch = minPitch;
+    this.maxPitch = maxPitch;
+    this.pitchJump = pitchJump;
+  }
+
+  initializeRange(maxRange,minrange)
+  {
+    this.maxRange = maxRange;
+    this.minrange = minrange;
   }
 
   incrementAzimuth()
@@ -108,7 +123,7 @@ class radarAA
         {
           relativePositionVector     = this.getAxisBetweenTwoPoints(otPlanePos,this.position);
           //console.log(relativePositionVector);
-          //console.log((1/3.14)*180*(relativePositionVector.angleTo(this.rollAxis)));
+          console.log(name,(1/3.14)*180*(relativePositionVector.angleTo(this.rollAxis)));
         }
       }
     }
