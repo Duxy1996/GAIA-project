@@ -23,7 +23,8 @@ class radarAA
     this.frecuency;
 
     this.maxRange;
-    this.minrange;
+    this.minRange;
+    this.coneAngleDeg;
 
     this.error;
     this.incrementError;
@@ -36,17 +37,18 @@ class radarAA
     this.azimuzJump = azimuzJump;
   }
 
-  initializeAzimuth(minPitch,maxPitch,pitchJump)
+  initializePitch(minPitch,maxPitch,pitchJump)
   {
     this.minPitch = minPitch;
     this.maxPitch = maxPitch;
     this.pitchJump = pitchJump;
   }
 
-  initializeRange(maxRange,minrange)
+  initializeRange(maxRange,minRange,coneAngleDeg)
   {
     this.maxRange = maxRange;
-    this.minrange = minrange;
+    this.minRange = minRange;
+    this.coneAngleDeg = coneAngleDeg/2;
   }
 
   incrementAzimuth()
@@ -92,13 +94,29 @@ class radarAA
     this.rollAxis = rollAxis;
   }
 
+  substractPoints()
+  {
+    var posX = pointA.x - pointB.x;
+    var posY = pointA.y - pointB.y;
+    var posZ = pointA.z - pointB.z;
+  }
+
+  getDistanceBetweenTwoPoints(pointA,pointB)
+  {
+    var posX = pointA.x - pointB.x;
+    var posY = pointA.y - pointB.y;
+    var posZ = pointA.z - pointB.z;
+    var norm = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
+    return norm;
+  }
+
   getAxisBetweenTwoPoints(pointA,pointB)
   {
     var posX = pointA.x - pointB.x;
     var posY = pointA.y - pointB.y;
     var posZ = pointA.z - pointB.z;
 
-    var norm  = Math.sqrt(posX*posX+posY*posY+posZ*posZ);
+    var norm  = this.getDistanceBetweenTwoPoints(pointA,pointB);
 
     var axis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
 
@@ -118,16 +136,20 @@ class radarAA
 
         otPlanePos                 = listOfPlanes[planes].getTrackInfo().getposition();
         name                       = listOfPlanes[planes].getTrackInfo().getName();
-        //console.log(name,this.rollAxis);
         if (otPlanePos != undefined)
         {
+          var distance = this.getDistanceBetweenTwoPoints(otPlanePos,this.position);
           relativePositionVector     = this.getAxisBetweenTwoPoints(otPlanePos,this.position);
-          //console.log(relativePositionVector);
-          console.log(name,(1/3.14)*180*(relativePositionVector.angleTo(this.rollAxis)));
+          var angleDegPlane = (1/3.14)*180*(relativePositionVector.angleTo(this.rollAxis));
+          if((distance < this.maxRange) && (distance > this.minRange))
+          {
+            if(angleDegPlane < this.coneAngleDeg)
+            {
+              console.log(name);
+            }
+          }
         }
       }
     }
-    //console.log(listOfPlanes[listOfPlanes.length-2].getTrackInfo().getposition());
-    //console.log(this.pitchAxis);
   }
 }

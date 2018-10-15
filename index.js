@@ -147,6 +147,11 @@ class Plane
     this.id                  = 0;
 
     this.radarAA             = new radarAA();
+
+    this.radarAA.initializeAzimuth(10,10,1);
+    this.radarAA.initializePitch(10,10,1);
+    this.radarAA.initializeRange(100,5,100);
+
     this.trackInfo           = new trackInfo();
 
     this.pitchAxis = THREE.Vector3();
