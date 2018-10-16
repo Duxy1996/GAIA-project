@@ -24,7 +24,7 @@ function main()
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
   sp.addPlaneObject('./assets/models/spitfire.obj','sp1');
   ef.addPlaneScale( 0.1 , 0.1 , 0.1 );
-  sp.addPlaneScale( 0.3 , 0.3 , 0.3 );
+  sp.addPlaneScale( 0.01 , 0.01 , 0.01 );
   ef.addColor();
   sp.addColor();
   ef.addToScene(myscene);

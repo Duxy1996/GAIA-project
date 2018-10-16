@@ -6,7 +6,7 @@ class radarAA
     this.pitchAxis    = THREE.Vector3();
     this.rollAxis     = THREE.Vector3();
 
-    this.listOfTracks = [];
+    this.listOfTracks = {};
     this.ownerId;
     this.ownerName;
 
@@ -117,7 +117,6 @@ class radarAA
     var posZ = pointA.z - pointB.z;
 
     var norm  = this.getDistanceBetweenTwoPoints(pointA,pointB);
-
     var axis  = new THREE.Vector3(posX/norm,posY/norm,posZ/norm);
 
     return axis;
@@ -136,6 +135,7 @@ class radarAA
 
         otPlanePos                 = listOfPlanes[planes].getTrackInfo().getposition();
         name                       = listOfPlanes[planes].getTrackInfo().getName();
+
         if (otPlanePos != undefined)
         {
           var distance = this.getDistanceBetweenTwoPoints(otPlanePos,this.position);
@@ -145,7 +145,7 @@ class radarAA
           {
             if(angleDegPlane < this.coneAngleDeg)
             {
-              console.log(name);
+              this.listOfTracks[name] = listOfPlanes[planes];
             }
           }
         }
