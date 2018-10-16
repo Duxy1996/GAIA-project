@@ -94,11 +94,15 @@ class radarAA
     this.rollAxis = rollAxis;
   }
 
-  substractPoints()
+  substractPoints(pointA,pointB)
   {
     var posX = pointA.x - pointB.x;
     var posY = pointA.y - pointB.y;
     var posZ = pointA.z - pointB.z;
+
+    var pRet = THREE.Vector3(posX,posY,posZ);
+
+    return pRet;
   }
 
   getDistanceBetweenTwoPoints(pointA,pointB)
@@ -140,16 +144,23 @@ class radarAA
         {
           var distance = this.getDistanceBetweenTwoPoints(otPlanePos,this.position);
           relativePositionVector     = this.getAxisBetweenTwoPoints(otPlanePos,this.position);
-          var angleDegPlane = (1/3.14)*180*(relativePositionVector.angleTo(this.rollAxis));
+          var rollAxisConverted = this.rollAxis.applyAxisAngle(this.pitchAxis,this.pitch);
+          var angleDegPlane = (1/3.14)*180*(relativePositionVector.angleTo(rollAxisConverted));
           if((distance < this.maxRange) && (distance > this.minRange))
           {
             if(angleDegPlane < this.coneAngleDeg)
             {
               this.listOfTracks[name] = listOfPlanes[planes];
+              console.log(this.listOfTracks[name].getTrackInfo().getName());
             }
           }
         }
       }
     }
+  }
+
+  returnTrackList()
+  {
+    return this.listOfTracks;
   }
 }
