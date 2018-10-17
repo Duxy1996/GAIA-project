@@ -1,5 +1,7 @@
 # Basic modular flight simulator
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/00a0ae43c6c8099f1487/maintainability)](https://codeclimate.com/github/Duxy1996/GAIA-project/maintainability)
+
 In this project our final goal is to set up a basic modular flight simulator to improve the VR
 experiences trying to mix some new techonlogies. To build the applications are using for the 3D
 management ThreeJS (A-Frame) and we want to use GO/GIN to host the server and React to build the interfaces.
