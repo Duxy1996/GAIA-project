@@ -5,6 +5,7 @@ class radarAA
     this.position     = THREE.Vector3();
     this.pitchAxis    = THREE.Vector3();
     this.rollAxis     = THREE.Vector3();
+    this.yawAxis      = THREE.Vector3();
 
     this.listOfTracks = {};
     this.ownerId;
@@ -87,11 +88,12 @@ class radarAA
     }
   }
 
-  updatePosition(position, pitchAxis, rollAxis)
+  updatePosition(position, pitchAxis, rollAxis, yawAxis)
   {
-    this.position = position;
+    this.position  = position;
     this.pitchAxis = pitchAxis;
-    this.rollAxis = rollAxis;
+    this.rollAxis  = rollAxis;
+    this.yawAxis   = yawAxis;
   }
 
   substractPoints(pointA,pointB)
@@ -143,9 +145,12 @@ class radarAA
         if (otPlanePos != undefined)
         {
           var distance = this.getDistanceBetweenTwoPoints(otPlanePos,this.position);
-          relativePositionVector     = this.getAxisBetweenTwoPoints(otPlanePos,this.position);
-          var rollAxisConverted = this.rollAxis.applyAxisAngle(this.pitchAxis,this.pitch);
-          var angleDegPlane = (1/3.14)*180*(relativePositionVector.angleTo(rollAxisConverted));
+          relativePositionVector = this.getAxisBetweenTwoPoints(otPlanePos,this.position);
+
+          var axisConverted     = this.rollAxis.applyAxisAngle(this.pitchAxis,this.pitch);
+          axisConverted       = axisConverted.applyAxisAngle(this.yawAxis,this.azimuth);
+
+          var angleDegPlane = (1/3.14)*180*(relativePositionVector.angleTo(axisConverted));
           if((distance < this.maxRange) && (distance > this.minRange))
           {
             if(angleDegPlane < this.coneAngleDeg)
