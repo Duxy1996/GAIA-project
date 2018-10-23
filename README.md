@@ -26,6 +26,4 @@ for the same simulation rom.
 
 The progress:
 
-![alt text]( https://image.ibb.co/bWyROe/lol.gif )
-
 ![alt text]( https://image.ibb.co/jQfj9K/lol2.gif )
