@@ -23,6 +23,8 @@ function main()
 
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
   sp.addPlaneObject('./assets/models/spitfire.obj','sp1');
+  ef.addCockpit('./assets/models/EF2000.obj','ef1cp');
+  //sp
   ef.addPlaneScale( 0.1 , 0.1 , 0.1 );
   sp.addPlaneScale( 0.01 , 0.01 , 0.01 );
   ef.addColor();
@@ -133,6 +135,14 @@ class Engine
 
 }
 
+class Cockpit
+{
+  constructor()
+  {
+
+  }
+}
+
 class Plane
 {
   constructor(pName)
@@ -167,6 +177,10 @@ class Plane
     this.object              = document.createElement('a-entity');
     this.objectRepresetation = document.createElement('a-entity');
 
+    // Cockpit class
+    this.cockpitView         = document.createElement('a-entity');
+    this.cockpitRep          = document.createElement('a-entity');
+
     this.axisA               = document.createElement('a-entity');
     this.axisB               = document.createElement('a-entity');
     this.axisC               = document.createElement('a-entity');
@@ -180,6 +194,20 @@ class Plane
     this.setPosition(0,0,0);
     this.initTrackInfo();
 
+  }
+
+  addCockpit (CockpitPath, CockpitId)
+  {
+    this.cockpitView.setAttribute('src', CockpitPath);
+    this.cockpitView.setAttribute('id', CockpitId);
+    this.cockpitRep.setAttribute('obj-model', 'obj: #' + CockpitId);
+    this.objectRepresetation.appendChild(this.cockpitRep);
+    this.objectRepresetation.appendChild(this.cockpitView);
+    this.objectRepresetation.setAttribute('material','opacity: 0.0; transparent: true');
+    this.cockpitRep.setAttribute('material','color: #000000;');
+    this.cockpitRep.setAttribute('scale', {x: 0.05, y: 0.05, z: 0.05});
+    this.cockpitRep.setAttribute('position', {x: 0.5, y: -1, z: -8.1});
+    this.cockpitRep.setAttribute('rotation', {x: -25, y: 0, z: 0});
   }
 
   addPlaneObject( Objectpath, ObjectId )
@@ -320,12 +348,14 @@ class Plane
   {
     camera.setAttribute('position', {x: 0, y: 1, z: -4} );
     camera.setAttribute('camera', 'active', true);
+    this.objectRepresetation.setAttribute('material','opacity: 0.0; transparent: true');
   }
 
   setCameraToBack(camera)
   {
     camera.setAttribute('position', {x: 0, y: 4, z: 4});
     camera.setAttribute('camera', 'active', true);
+    this.objectRepresetation.setAttribute('material','opacity: 1.0; transparent: false');
   }
 
   getPlane()
