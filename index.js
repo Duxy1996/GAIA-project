@@ -23,8 +23,6 @@ function main()
 
   ef.addPlaneObject('./assets/models/eurofighter.obj','ef1');
   sp.addPlaneObject('./assets/models/spitfire.obj','sp1');
-  ef.addCockpit('./assets/models/EF2000.obj','ef1cp');
-  //sp
   ef.addPlaneScale( 0.1 , 0.1 , 0.1 );
   sp.addPlaneScale( 0.01 , 0.01 , 0.01 );
   ef.addColor();
@@ -139,7 +137,25 @@ class Cockpit
 {
   constructor()
   {
+    this.cockpitView         = document.createElement('a-entity');
+    this.cockpitRep          = document.createElement('a-entity');
+  }
 
+  setCockPitPane( CockpitPath, CockpitId )
+  {
+    this.cockpitView.setAttribute('src', CockpitPath);
+    this.cockpitView.setAttribute('id', CockpitId);
+    this.cockpitRep.setAttribute('obj-model', 'obj: #' + CockpitId);
+  }
+
+  getCockpitView()
+  {
+    return this.cockpitView;
+  }
+
+  getCockpitRep()
+  {
+    return this.cockpitRep
   }
 }
 
@@ -178,8 +194,12 @@ class Plane
     this.objectRepresetation = document.createElement('a-entity');
 
     // Cockpit class
-    this.cockpitView         = document.createElement('a-entity');
-    this.cockpitRep          = document.createElement('a-entity');
+    //this.cockpitView         = document.createElement('a-entity');
+    //this.cockpitRep          = document.createElement('a-entity');
+
+    this.cockpit             = new Cockpit();
+    this.cockpit.setCockPitPane('./assets/models/EF2000.obj','ef1cp');
+    this.addCockpit(this.cockpit.getCockpitView(),this.cockpit.getCockpitRep());
 
     this.axisA               = document.createElement('a-entity');
     this.axisB               = document.createElement('a-entity');
@@ -196,18 +216,15 @@ class Plane
 
   }
 
-  addCockpit (CockpitPath, CockpitId)
+  addCockpit (cockpitView, cockpitRep)
   {
-    this.cockpitView.setAttribute('src', CockpitPath);
-    this.cockpitView.setAttribute('id', CockpitId);
-    this.cockpitRep.setAttribute('obj-model', 'obj: #' + CockpitId);
-    this.objectRepresetation.appendChild(this.cockpitRep);
-    this.objectRepresetation.appendChild(this.cockpitView);
+    this.objectRepresetation.appendChild(cockpitRep);
+    this.objectRepresetation.appendChild(cockpitView);
     this.objectRepresetation.setAttribute('material','opacity: 0.0; transparent: true');
-    this.cockpitRep.setAttribute('material','color: #000000;');
-    this.cockpitRep.setAttribute('scale', {x: 0.05, y: 0.05, z: 0.05});
-    this.cockpitRep.setAttribute('position', {x: 0.5, y: -1, z: -8.1});
-    this.cockpitRep.setAttribute('rotation', {x: -25, y: 0, z: 0});
+    cockpitRep.setAttribute('material','color: #000000;');
+    cockpitRep.setAttribute('scale', {x: 0.05, y: 0.05, z: 0.05});
+    cockpitRep.setAttribute('position', {x: 0.5, y: -1, z: -8.1});
+    cockpitRep.setAttribute('rotation', {x: -25, y: 0, z: 0});
   }
 
   addPlaneObject( Objectpath, ObjectId )
