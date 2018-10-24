@@ -139,13 +139,23 @@ class Cockpit
   {
     this.cockpitView         = document.createElement('a-entity');
     this.cockpitRep          = document.createElement('a-entity');
+    this.radarPane           = document.createElement('a-plane');
   }
 
   setCockPitPane( CockpitPath, CockpitId )
   {
     this.cockpitView.setAttribute('src', CockpitPath);
     this.cockpitView.setAttribute('id', CockpitId);
+
+    this.radarPane.setAttribute('id', 'radarPane');
+    this.radarPane.setAttribute('height',1.2);
+    this.radarPane.setAttribute('width',1.2);
+    this.radarPane.setAttribute('position', {x: 0.05, y: -0.75, z: -6.2});
+    this.radarPane.setAttribute('rotation', {x: -25, y: 0, z: 0});
+    this.radarPane.setAttribute('color','red');
+
     this.cockpitRep.setAttribute('obj-model', 'obj: #' + CockpitId);
+    this.cockpitView.appendChild(this.radarPane);
   }
 
   getCockpitView()
@@ -216,7 +226,7 @@ class Plane
   {
     this.objectRepresetation.appendChild(cockpitRep);
     this.objectRepresetation.appendChild(cockpitView);
-    this.objectRepresetation.setAttribute('material','opacity: 0.0; transparent: true');
+    //this.objectRepresetation.setAttribute('material','opacity: 0.0; transparent: true');
     cockpitRep.setAttribute('material','color: #000000;');
     cockpitRep.setAttribute('scale', {x: 0.05, y: 0.05, z: 0.05});
     cockpitRep.setAttribute('position', {x: 0.5, y: -1, z: -8.1});
