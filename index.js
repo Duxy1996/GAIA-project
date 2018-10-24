@@ -193,10 +193,6 @@ class Plane
     this.object              = document.createElement('a-entity');
     this.objectRepresetation = document.createElement('a-entity');
 
-    // Cockpit class
-    //this.cockpitView         = document.createElement('a-entity');
-    //this.cockpitRep          = document.createElement('a-entity');
-
     this.cockpit             = new Cockpit();
     this.cockpit.setCockPitPane('./assets/models/EF2000.obj','ef1cp');
     this.addCockpit(this.cockpit.getCockpitView(),this.cockpit.getCockpitRep());
