@@ -19,8 +19,9 @@ for the same simulation rom.
 * [ ] GO/GIN based application
 * [ ] React based interface managerç
 * [ ] Implement CI with travis
-* [ ] Artefact lib with CONAN
+* [ ] Artifact lib with CONAN
 * [ ] Fast deploy with Docker
+* [ ] Added HLA proxy (Connect to HLA net standard in simlation)
 * [ ] ThreeJS model management (A-Frame framawork used)
 * [ ] ...
 
