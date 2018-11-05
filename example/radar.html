@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl - lookup table</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        color: #000;
+        font-family:Monospace;
+        font-size:13px;
+        text-align:center;
+        font-weight: bold;
+
+        background-color: #fff;
+        margin: 0px;
+        overflow: hidden;
+      }
+
+      #info {
+        color:#000;
+        position: absolute;
+        top: 0px; width: 100%;
+        padding: 5px;
+
+      }
+
+      .float{
+        position:fixed;
+        width:60px;
+        height:60px;
+        bottom:40px;
+        right:40px;
+        background-color:#0C9;
+        color:#FFF;
+        border-radius:50px;
+        text-align:center;
+        box-shadow: 2px 2px 3px #999;
+      }
+
+      .my-float{
+        margin-top:22px;
+      }
+
+      a {
+        color: red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="#" class="float">
+      <i class="my-float">
+      <p id="myAnchor">0</p>
+    </i>
+    </a>
+    <div id="container"></div>
+
+    <script src="../build/three.js"></script>
+    <script src="js/math/Lut.js"></script>
+    <script src="js/WebGL.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+
+    <script>
+
+      if ( WEBGL.isWebGLAvailable() === false ) {
+
+        document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+
+      }
+
+      var container, stats;
+
+      var camera, scene, renderer, lut, legendLayout;
+
+      var mesh, material;
+
+      var colorMap;
+      var numberOfColors;
+
+      var loader = new THREE.BufferGeometryLoader();
+
+      var mesh;
+
+      var direction = false;
+
+      var pixelPos = 0;
+      var pixelPosTimeout = 0;
+
+      init();
+      animate();
+
+      function init() {
+
+        container = document.getElementById( 'container' );
+
+        // SCENE
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color( 0xffffff );
+
+        // CAMERA
+        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 100 );
+        camera.position.set( 0, 0, 10 );
+
+        stats = new Stats();
+        container.appendChild( stats.dom );
+
+        // LIGHT
+        var ambientLight = new THREE.AmbientLight( 0x444444 );
+        scene.add( ambientLight );
+
+        colorMap = 'rainbow';
+        numberOfColors = 512;
+
+        legendLayout = 'vertical';
+
+        material = new THREE.MeshLambertMaterial( {
+          side: THREE.DoubleSide,
+          color: 0xF5F5F5,
+          vertexColors: THREE.VertexColors
+        } );
+
+        // my radar
+
+        var geometry = new THREE.BoxGeometry( 6, 6, 0.1, 31, 31, 0 );
+
+        for ( var i = 0; i < geometry.faces.length; i ++ ) {
+          var face = geometry.faces[ i ];
+            face.color.setHex( 0x000000 );
+        }
+
+        // my radar
+
+        mesh = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { vertexColors: THREE.FaceColors } ));
+        scene.add( mesh );
+
+        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
+        directionalLight.position.set( 17, 9, 30 );
+        scene.add( directionalLight );
+
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        container.appendChild( renderer.domElement );
+
+        window.addEventListener( 'resize', onWindowResize, false );
+        window.addEventListener( 'keydown', onKeyDown, true );
+
+      }
+
+      function onWindowResize() {
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        render();
+
+      }
+
+      function animate() {
+
+        requestAnimationFrame( animate );
+
+        render();
+        stats.update();
+
+      }
+
+      function positionRadar(resolution, distance, angle)
+      {
+        var firstPixel = resolution * 4 * 2;
+        var yPosition = Math.cos(angle)*distance;
+        var xPosition = Math.sin(angle)*distance;
+
+        var centerPizel = firstPixel + parseInt(resolution*(resolution));
+        var targetposition = yPosition*2*resolution;
+        return centerPizel;
+      }
+
+      function render() {
+
+
+        if(!direction)
+        {
+          if ( mesh !== undefined ) mesh.rotation.y += 0.01;
+          if(mesh.rotation.y > 1.1) direction = !direction
+        }
+        else{
+          if ( mesh !== undefined ) mesh.rotation.y -= 0.01;
+          if(mesh.rotation.y < -1.1) direction = !direction
+        }
+
+        pixelPosTimeout += 1;
+        if(pixelPosTimeout > 5)
+        {
+          pixelPos += 2;
+          pixelPosTimeout = 0;
+
+          var dim = 31;
+          var geometryA = new THREE.BoxGeometry( 6, 6, 0.1, dim, dim, 0 );
+
+          var dif = dim * 4 * 2;
+
+          document.getElementById("myAnchor").innerHTML = ""+(pixelPos+dif);
+
+          for ( var i = 0; i < geometryA.faces.length; i ++ ) {
+            var face = geometryA.faces[ i ];
+
+            if ((i == (dif + pixelPos)) || (i == (dif+1+pixelPos)))
+            {
+              face.color.setHex( 0x00FF00 );
+            }
+            else{
+              if ((positionRadar(dim, 10, 0) == i) | (positionRadar(dim, 10, 0)-1 == i) )
+              {
+                face.color.setHex( 0xFF0000 );
+              } else
+              {
+                face.color.setHex( 0x000000 );
+              }
+            }
+          }
+
+          mesh.geometry = geometryA;
+        }
+
+        renderer.render( scene, camera );
+
+      }
+
+      function onKeyDown( e ) {
+
+
+
+      }
+
+    </script>
+
+  </body>
+</html>
